@@ -1,0 +1,18 @@
+FROM 348221620929.dkr.ecr.us-east-1.amazonaws.com/base/status:python-3.9.12-alpine3.15-arm
+
+WORKDIR /app
+
+RUN apk update \
+    && apk add --upgrade --no-cache \
+        bash openssh curl ca-certificates openssl less htop \
+		g++ make wget rsync rsyslog \
+        build-base libpng-dev freetype-dev libexecinfo-dev openblas-dev libgomp lapack-dev libffi-dev \
+		libgcc musl  \
+		libgfortran \
+		lapack-dev postgresql-dev gcc python3-dev musl-dev \
+	&&  pip install --no-cache-dir --upgrade pip
+
+ADD ./requirements.txt .
+ADD ./rsyslog.conf /etc/rsyslog.conf
+
+RUN pip install --trusted-host pypi.python.org -r requirements.txt

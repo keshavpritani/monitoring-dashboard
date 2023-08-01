@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+
+    <title>AWS {{ENV|title}} Components</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+          <link
+          rel="stylesheet"
+          href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css"
+          crossorigin="anonymous"
+      />
+      <link
+          rel="stylesheet"
+          href="https://cdn.datatables.net/datetime/1.1.1/css/dataTables.dateTime.min.css"
+          crossorigin="anonymous"
+      />
+    <style>
+        table.display { 
+            margin:0 auto;  
+            width:100%;  
+        }  
+        .dataTables_wrapper {
+        display: inline-table;
+
+        /* below optional .*/
+        --width: auto;
+        --max-width: 45%;
+    }
+
+    </style>
+</head>
+
+<body>
+
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">Kristal {{ENV|title}} AWS Components</a>
+        <ul class="nav navbar-nav ml">
+            <li class="nav-item">
+                <a class="nav-link" href="/status" target="_blank">Status</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="#">Infra</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/status/admin" target="_blank">Admin</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{alert_service_url}}/" target="_blank">Alerts</a>
+            </li>
+        </ul>  
+        <ul class="nav navbar-nav ml-auto">
+            <span class="text-light">Welcome {{ user_name }}</span>
+          </ul>
+    </nav>
+</header>
+
+
+<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <a class="nav-link active" id="pills-baseline-tab" data-toggle="pill" href="#pills-baseline" role="tab"
+           aria-controls="pills-baseline" aria-selected="true">Baseline</a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link" id="pills-diff-tab" data-toggle="pill" href="#pills-diff" role="tab"
+           aria-controls="pills-diff" aria-selected="true">Only Difference</a>
+    </li>
+    {% for serviceName in services.keys %}
+    <li class="nav-item" role="presentation">
+        <a class="nav-link" id="pills-{{ serviceName }}-tab" data-toggle="pill" href="#pills-{{ serviceName }}"
+           role="tab" aria-controls="pills-{{ serviceName }}" aria-selected="false">{{ serviceName }}</a>
+    </li>
+    {% endfor %}
+    <li class="nav-item" role="presentation">
+        <a class="nav-link" id="pills-log-tab" data-toggle="pill" href="#pills-log" role="tab"
+           aria-controls="pills-log" aria-selected="true">Audit Log</a>
+    </li>
+</ul>
+
+<div class="tab-content" id="pills-tabContent">
+    <!-- Baseline Tab Content -->
+    <div class="tab-pane fade show active" id="pills-baseline" role="tabpanel" aria-labelledby="pills-baseline-tab">
+        <main role="main">
+
+            <div class="bg-light" style="padding-top: 20px;">
+                <div class="container-fluid">
+                    <a href="/infra/refresh/current">
+                        <button type="button" class="btn btn-success btn-md"> Refresh the Current State of All the
+                            Services
+                        </button>
+                    </a>
+                </div>
+            </div>
+
+            {% for serviceName, serviceDicts in services.items %}
+            <div class="album py-5 bg-light">
+                <div class="container">
+                    <p><strong>{{ serviceName }} Baseline:</strong></p>
+                    <div class="row">
+                        <table class="datatable-example display dataTables_wrapper" >
+                            <thead>
+                                <tr>
+                                    {% for header in serviceDicts.column_list %}
+                                    {% if header != 'deleted' %}
+                                    <th>{{ header|replace|title }}</th>
+                                    {% endif %}
+                                    {% endfor %}
+                                    <th>Last Update</th>
+                                </tr>
+                            </thead>
+                            {% for key, values in serviceDicts.baseline.items %}
+                            <tr style="background: whitesmoke;">
+                                <td> {{ key }}</td>
+                                {% for vals in values %}
+                                {% if forloop.counter != 1 and forloop.counter != values|length|add:"-1"  %}
+                                <td>
+                                    {% if forloop.counter in serviceDicts.arrays %}
+                                    <!-- Trigger the modal with a button -->
+                                    <button type="button" class="btn btn-info btn-sm" data-toggle="modal"
+                                            data-target="#myModal-baseline-{{ key }}-{{ forloop.counter }}">
+                                        {% if serviceName == "Security Group" %}
+                                        Inbound Rules
+                                        {% elif serviceName == "RDS" %}
+                                        {% if forloop.counter == serviceDicts.arrays.0 %}
+                                        View Subnets
+                                        {% else %}
+                                        View SGs
+                                        {% endif %}
+                                        {% elif serviceName == "NACL" %}
+                                        View IP Entries
+                                        {% elif serviceName == "Route Tables" %}
+                                        {% if forloop.counter == serviceDicts.arrays.0 %}
+                                        View Routes
+                                        {% else %}
+                                        View Subnets
+                                        {% endif %}
+                                        {% elif serviceName == "EC2" %}
+                                        View SGs
+                                        {% endif %}
+                                    </button>
+
+                                    <!-- Modal -->
+                                    <div id="myModal-baseline-{{ key }}-{{ forloop.counter }}" class="modal fade"
+                                         role="dialog">
+                                        <div class="modal-dialog">
+
+                                            <!-- Modal content-->
+                                            <div class="modal-content">
+                                                <div class="modal-header" style="align-self: self-start">
+                                                    <button type="button" class="close" data-dismiss="modal">&times;
+                                                    </button>
+                                                    <h4 class="modal-title">
+                                                        {% if serviceName == "Security Group" %}
+                                                        Inbound Rules
+                                                        {% elif serviceName == "RDS" %}
+                                                        {% if forloop.counter == serviceDicts.arrays.0 %}
+                                                        View Subnets
+                                                        {% else %}
+                                                        View SGs
+                                                        {% endif %}
+                                                        {% elif serviceName == "NACL" %}
+                                                        View IP Entries
+                                                        {% elif serviceName == "Route Tables" %}
+                                                        {% if forloop.counter == serviceDicts.arrays.0 %}
+                                                        View Routes
+                                                        {% else %}
+                                                        View Subnets
+                                                        {% endif %}
+                                                        {% elif serviceName == "EC2" %}
+                                                        View SGs
+                                                        {% endif %}
+                                                        - {{ key }}
+                                                    </h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <!-- <p>{{ vals }}</p> -->
+                                                    {% if serviceName == "Security Group" %}
+                                                    <table cellpadding="4px" width="100%" border="1">
+                                                        <tr>
+                                                            <th>From Port</th>
+                                                            <th>Protocol</th>
+                                                            <th>IP</th>
+                                                            <th>Description</th>
+                                                        </tr>
+                                                        {% for x in vals %}
+                                                        {% for ips in x.IpRanges %}
+                                                        <tr>
+                                                            <td>{{ x.FromPort }}</td>
+                                                            <td>{{ x.IpProtocol }}</td>
+                                                            <td>{{ ips.CidrIp }}</td>
+                                                            <td>{{ ips.Description }}</td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                        {% for ips in x.UserIdGroupPairs %}
+                                                        <tr>
+                                                            <td>{{ x.FromPort }}</td>
+                                                            <td>{{ x.IpProtocol }}</td>
+                                                            <td>{{ ips.GroupId }}</td>
+                                                            <td>{{ ips.Description }}</td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                        {% endfor %}
+                                                    </table>
+                                                    {% elif serviceName == "NACL" %}
+                                                    <table cellpadding="4px" width="100%" border="1">
+                                                        <tr>
+                                                            <th>Egress</th>
+                                                            <th>CidrBlock</th>
+                                                            <th>Protocol</th>
+                                                            <th>Port Ranges</th>
+                                                            <th>RuleNumber</th>
+                                                            <th>RuleAction</th>
+                                                        </tr>
+                                                        {% for x in vals %}
+                                                        <tr>
+                                                            <td>{{ x.Egress }}</td>
+                                                            <td>{{ x.CidrBlock }}</td>
+                                                            <td>{{ x.Protocol }}</td>
+                                                            <td>{{ x.PortRange.From }} - {{ x.PortRange.To }}</td>
+                                                            <td>{{ x.RuleNumber }}</td>
+                                                            <td>{{ x.RuleAction }}</td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </table>
+                                                    {% elif serviceName == "Route Tables" and forloop.counter == serviceDicts.arrays.0 %}
+                                                    <table cellpadding="4px" width="100%" border="1">
+                                                        <tr>
+                                                            <th>Destination</th>
+                                                            <th>State</th>
+                                                            <th>Description</th>
+                                                        </tr>
+                                                        {% for x in vals %}
+                                                        <tr>
+                                                            <td>{{ x.destination }}</td>
+                                                            <td>{{ x.state }}</td>
+                                                            <td>{{ x.desc }}</td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </table>
+                                                    {% else %}
+                                                    <ul>
+                                                        {% for x in vals %}
+                                                        <li> {{ x }}</li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                                                        Close
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <span style="color: {{values.0}}"> {{ vals }} </span>
+                                    {% endif %}
+                                </td>
+                                {% endif %}
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <div class="bg-light" style="padding-bottom: 20px;">
+                <div class="container-fluid">
+                    <a href="/infra/refresh/baseline">
+                        <button type="button" class="btn btn-warning btn-md"> Reset Baseline Data</button>
+                    </a>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Only Difference Tab Content -->
+    <div class="tab-pane fade" id="pills-diff" role="tabpanel" aria-labelledby="pills-diff-tab">
+        <main role="main">
+            <div class="bg-light" style="padding-top: 20px;">
+                <div class="container-fluid">
+                    <a href="/infra/merge/all">
+                        <button type="button" class="btn btn-success btn-md"> Merge All the Changes to the Baseline</button>
+                    </a>
+                </div>
+            </div>
+            {% for serviceName, serviceDicts in services.items %}
+            <div class="album py-5 bg-light">
+                <div class="container">
+                    <p><strong>{{ serviceName }}'s Only Difference:</strong></p>
+                    <div class="row">
+                        <table cellpadding="6px" width="100%" border="1">
+                            <thead>
+                                <th>Instance ID</th>
+                                <th>Instance Name</th>
+                                <th>Description</th>
+                            </thead>
+                            {% for key, values in serviceDicts.diff.items %}
+                            <tr>
+                                <td> {{ key }}</td>
+                                <td> {{ values.0 }}</td>
+                                <td> {{ values.1|safe }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </main>
+    </div>
+
+    <!-- Service's Current Tab Content -->
+    {% for serviceName, serviceDicts in services.items %}
+    <div class="tab-pane fade" id="pills-{{ serviceName }}" role="tabpanel"
+         aria-labelledby="pills-{{ serviceName }}-tab">
+        <main role="main">
+            <div class="bg-light" style="padding-top: 20px;">
+                <div class="container-fluid">
+                    <a href="/infra/merge/{{ serviceName }}">
+                        <button type="button" class="btn btn-success btn-md"> Merge the Changes to the Baseline</button>
+                    </a>
+                </div>
+            </div>
+            <div class="album py-5 bg-light">
+                <div class="container">
+                    <p><strong>{{ serviceName }} Instances:</strong></p>
+                    <div class="row">
+                        <table class="datatable-example display dataTables_wrapper">
+                            <thead>
+                                <tr>
+                                    {% for header in serviceDicts.column_list %}
+                                    {% if header != 'deleted' %}
+                                    <th>{{ header|replace|title }}</th>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            {% for key, values in serviceDicts.current.items %}
+                            <tr>
+                                <td> {{ key }}</td>
+                                {% for vals in values %}
+                                {% if forloop.counter != 1 and forloop.counter != values|length  %}
+                                <td>
+                                    {% if forloop.counter in serviceDicts.arrays %}
+                                    <!-- Trigger the modal with a button -->
+                                    <button type="button" class="btn btn-info btn-sm" data-toggle="modal"
+                                            data-target="#myModal-{{ key }}-{{ forloop.counter }}">
+                                        {% if serviceName == "Security Group" %}
+                                        Inbound Rules
+                                        {% elif serviceName == "RDS" %}
+                                        {% if forloop.counter == serviceDicts.arrays.0 %}
+                                        View Subnets
+                                        {% else %}
+                                        View SGs
+                                        {% endif %}
+                                        {% elif serviceName == "NACL" %}
+                                        View IP Entries
+                                        {% elif serviceName == "Route Tables" %}
+                                        {% if forloop.counter == serviceDicts.arrays.0 %}
+                                        View Routes
+                                        {% else %}
+                                        View Subnets
+                                        {% endif %}
+                                        {% elif serviceName == "EC2" %}
+                                        View SGs
+                                        {% endif %}
+                                    </button>
+
+                                    <!-- Modal -->
+                                    <div id="myModal-{{ key }}-{{ forloop.counter }}" class="modal fade" role="dialog">
+                                        <div class="modal-dialog">
+
+                                            <!-- Modal content-->
+                                            <div class="modal-content">
+                                                <div class="modal-header" style="align-self: self-start">
+                                                    <button type="button" class="close" data-dismiss="modal">&times;
+                                                    </button>
+                                                    <h4 class="modal-title">
+                                                        {% if serviceName == "Security Group" %}
+                                                        Inbound Rules
+                                                        {% elif serviceName == "RDS" %}
+                                                        {% if forloop.counter == serviceDicts.arrays.0 %}
+                                                        View Subnets
+                                                        {% else %}
+                                                        View SGs
+                                                        {% endif %}
+                                                        {% elif serviceName == "NACL" %}
+                                                        View IP Entries
+                                                        {% elif serviceName == "Route Tables" %}
+                                                        {% if forloop.counter == serviceDicts.arrays.0 %}
+                                                        View Routes
+                                                        {% else %}
+                                                        View Subnets
+                                                        {% endif %}
+                                                        {% elif serviceName == "EC2" %}
+                                                        View SGs
+                                                        {% endif %}
+                                                        - {{ key }}
+                                                    </h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <!-- <p>{{ vals }}</p> -->
+                                                    {% if serviceName == "Security Group" %}
+                                                    <table cellpadding="4px" width="100%" border="1">
+                                                        <tr>
+                                                            <th>From Port</th>
+                                                            <th>Protocol</th>
+                                                            <th>IP</th>
+                                                            <th>Description</th>
+                                                        </tr>
+                                                        {% for x in vals %}
+                                                        {% for ips in x.IpRanges %}
+                                                        <tr>
+                                                            <td>{{ x.FromPort }}</td>
+                                                            <td>{{ x.IpProtocol }}</td>
+                                                            <td>{{ ips.CidrIp }}</td>
+                                                            <td>{{ ips.Description }}</td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                        {% for ips in x.UserIdGroupPairs %}
+                                                        <tr>
+                                                            <td>{{ x.FromPort }}</td>
+                                                            <td>{{ x.IpProtocol }}</td>
+                                                            <td>{{ ips.GroupId }}</td>
+                                                            <td>{{ ips.Description }}</td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                        {% endfor %}
+                                                    </table>
+                                                    {% elif serviceName == "NACL" %}
+                                                    <table cellpadding="4px" width="100%" border="1">
+                                                        <tr>
+                                                            <th>Egress</th>
+                                                            <th>CidrBlock</th>
+                                                            <th>Protocol</th>
+                                                            <th>Port Ranges</th>
+                                                            <th>RuleNumber</th>
+                                                            <th>RuleAction</th>
+                                                        </tr>
+                                                        {% for x in vals %}
+                                                        <tr>
+                                                            <td>{{ x.Egress }}</td>
+                                                            <td>{{ x.CidrBlock }}</td>
+                                                            <td>{{ x.Protocol }}</td>
+                                                            <td>{{ x.PortRange.From }} - {{ x.PortRange.To }}</td>
+                                                            <td>{{ x.RuleNumber }}</td>
+                                                            <td>{{ x.RuleAction }}</td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </table>
+                                                    {% elif serviceName == "Route Tables" and forloop.counter == serviceDicts.arrays.0 %}
+                                                    <table cellpadding="4px" width="100%" border="1">
+                                                        <tr>
+                                                            <th>Destination</th>
+                                                            <th>State</th>
+                                                            <th>Description</th>
+                                                        </tr>
+                                                        {% for x in vals %}
+                                                        <tr>
+                                                            <td>{{ x.destination }}</td>
+                                                            <td>{{ x.state }}</td>
+                                                            <td>{{ x.desc }}</td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </table>
+                                                    {% else %}
+                                                    <ul>
+                                                        {% for x in vals %}
+                                                        <li> {{ x }}</li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                                                        Close
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <span style="color: {{values.0}}"> {{ vals }} </span>
+                                    {% endif %}
+                                </td>
+                                {% endif %}
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    {% endfor %}
+
+    <!-- Log Tab Content -->
+    <div class="tab-pane fade" id="pills-log" role="tabpanel" aria-labelledby="pills-log-tab">
+        <main role="main">
+            {% for serviceName, serviceArray in log.items %}
+            <div class="album py-5 bg-light">
+                <div class="container">
+                    <p><strong>{{ serviceName }} Log:</strong>
+                        (
+                            <a target="_blank" href="/infra/logs/{{ serviceName }}">More</a>
+                        )
+                    </p>
+                    <div class="row">
+                        <table cellpadding="6px" width="100%" border="1">
+                            <thead>
+                                <tr>
+                                   <th>Created on</th>
+                                   <th>Instance ID</th>
+                                   <th>Logs</th>
+                                   <th>Verified by:</th>
+                                </tr>
+                            </thead>
+                            {% for values in serviceArray %}
+                            <tr style="background: whitesmoke;">
+                                {% for value in values %}
+                                <td>
+                                    {% if forloop.last %}
+                                    {{value}}
+                                    {% else %}
+                                    {{ value|safe }}
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </main>
+    </div>
+
+</div>
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+        <script
+        src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"
+    ></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"
+    ></script>
+    <script
+        src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"
+    ></script>
+    <script
+        src="https://code.jquery.com/jquery-3.5.1.js"
+        crossorigin="anonymous"
+    ></script>
+    <script
+        src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"
+        crossorigin="anonymous"
+    ></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"
+        crossorigin="anonymous"
+    ></script>
+    <script
+        src="https://cdn.datatables.net/datetime/1.1.1/js/dataTables.dateTime.min.js"
+        crossorigin="anonymous"
+    ></script>
+    <script
+        src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"
+        crossorigin="anonymous"
+    ></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"
+        crossorigin="anonymous"
+    ></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"
+        crossorigin="anonymous"
+    ></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"
+        crossorigin="anonymous"
+    ></script>
+    <script
+        src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"
+        crossorigin="anonymous"
+    ></script>
+    <script
+        src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"
+        crossorigin="anonymous"
+    ></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var data = {
+            dom: "Blfrtip",
+            buttons: ["copy", "csv", "excel", "pdf", "print"],
+            lengthMenu: [
+                [10, 25, 50, -1],
+                [10, 25, 50, "All"],
+            ],
+            "order": [],
+            orderCellsTop: true,
+            fixedHeader: true,
+        }
+        $(".datatable-example").DataTable(data);
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		{% load static %}
+		<meta charset="utf-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1, shrink-to-fit=no"
+		/>
+		<meta name="description" content="" />
+		<meta name="author" content="" />
+
+		<title>Alert Console</title>
+
+		<!-- Bootstrap core CSS -->
+		<link
+			rel="stylesheet"
+			href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+			integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+			crossorigin="anonymous"
+		/>
+		<style>
+		  .silent-active {
+			border-color: red; 
+			border-width: 0.1cm;
+			color: red;
+		  }
+		</style>
+	</head>
+
+	<body>
+		<header>
+			<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+				<div class="navbar-header">    
+					<a class="navbar-brand" href="#">Kristal {{ENV|title}} Alerts Console</a>
+				</div>
+				<ul class="nav navbar-nav ml">
+					<li class="nav-item">
+						<a class="nav-link" href="{{status_service_url}}/" target="_blank">Status</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="{{status_service_url}}/../infra" target="_blank">Infra</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="{{status_service_url}}/admin/" target="_blank">Admin</a>
+					</li>
+					<li class="nav-item active">
+						<a class="nav-link" href="#">Alerts</a>
+					</li>
+				</ul>
+				<ul class="nav navbar-nav ml-auto">
+					<span class="text-light">Welcome {{ user_name }}</span>
+				</ul>
+			</nav>
+		</header>
+
+		<div class="tab-content" id="pills-tabContent">
+			<div class="tab-pane fade show active" role="tabpanel">
+				<main role="main">
+					<!-- Silent/Unsilent Alert -->
+					<div class="album py-5 bg-light">
+						<div class="container">
+							<div class="row">
+								<button
+									type="button"
+									class="btn btn-danger navbar-brand"
+									data-toggle="modal"
+                                    data-target="#silent-modal"
+								>
+									<!-- onclick="all_silent(true)" -->
+									Silent All Alerts
+								</button>
+								<div id="silent-modal" class="modal fade" role="dialog">
+									<div class="modal-dialog">
+
+										<!-- Modal content-->
+										<div class="modal-content">
+											<div class="modal-header" style="align-self: self-start">
+												<button type="button" class="close" data-dismiss="modal">&times;
+												</button>
+												<h4 class="modal-title">
+													Silent All Alerts
+												</h4>
+											</div>
+											<div class="modal-body">
+												<form action="/alert/toggle_silent_alert/true/" method="POST">
+													{% csrf_token %}
+													<span>Silent for: </span>
+													<select name="minutes">
+														<!-- <option>1</option> -->
+														<option>15</option>
+														<option>30</option>
+														<option>45</option>
+														<option>60</option>
+														<option>90</option>
+														<option>120</option>
+													</select>
+													<br> <br>
+													<input type="submit" value="Silent" class="btn btn-danger" />
+												</form>
+											</div>
+											<div class="modal-footer">
+												<button type="button" class="btn btn-default" data-dismiss="modal">
+													Close
+												</button>
+											</div>
+										</div>
+
+									</div>
+								</div>
+								<div>
+									Current Status: {{ is_silent }} ( Last Updated - {{ silent_at }} ) <br>
+									{{ extra_status }} {{ silent_by }}
+								</div>
+								<button
+									type="button"
+									class="btn btn-success ml-auto navbar-brand"
+									onclick="all_silent(false)"
+								>
+									Unsilent All Alerts
+								</button>
+							</div>
+						</div>
+					</div>
+
+					<!-- Modify Silent Alert Time -->
+					<div class="album py-5 bg-light">
+						<div class="container">
+							<p style="font-weight: bold">Modify Silent Alert Time:</p>
+							<div class="row">
+								<table width="100%" cellpadding="10">
+									<form method="post" action="/alert/update-silent-time/">
+      									{% csrf_token %}
+										<tbody>
+											<tr>
+												<td width="70%">Specific Alert</td>
+												<td>
+													<input 
+													type="number" 
+													name="specific"
+													value="{{ specific_alert_time }}"
+													style="width: 100%;"
+													>
+												</td>
+											</tr>
+											<tr>
+												<td>Release Alert</td>
+												<td>
+													<input 
+													type="number" 
+													name="release"
+													value="{{ release_alert_time }}"
+													style="width: 100%;"
+													>
+												</td>
+											</tr>
+											<tr>
+												<td colspan="2" align="center">
+													<input 
+													type="submit"
+													value="Submit" 
+													class="btn btn-success"
+													style="width: 50%;"
+													>
+												</td>
+											</tr>
+										</tbody>
+									</form>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<!-- Silent/Unsilent Services Alert -->
+					<div class="album py-5 bg-light">
+						<div class="container">
+							<p style="font-weight: bold">Silent Alerts List:</p>
+							<div class="row">
+								<table width="100%" border="1" cellpadding="5">
+									<thead>
+										<th>Service Name</th>
+										<th>Action</th>
+									</thead>
+									<tbody>
+										{% for alert in alerts %}
+										<tr>
+											<td>{{ alert }}</td>
+											<td>
+												<button
+													type="button"
+													class="btn btn-danger"
+													onclick="unsilent('{{ alert }}')"
+												>
+													Unsilent
+												</button>
+											</td>
+										</tr>
+										{% endfor %}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<!-- Last time alert -->
+					<div class="album py-5 bg-light">
+						<div class="container">
+							<p style="font-weight: bold">
+								Last Time Alert Dict:
+							</p>
+							<div class="row">
+								<table width="100%" border="1" cellpadding="5">
+									<thead>
+										<th>Service Name</th>
+										<th>Time</th>
+										{% if ENV != "prod" %}
+										<th>Action</th>
+										{% endif %}
+									</thead>
+									<tbody>
+										{% for key,values in last_alert_time.items %}
+										<tr>
+											<td style="cursor: pointer;" id="{{key}}"
+											onclick="silent(this)">{{ key }}</td>
+											<td>{{ values.last_alert_came }}</td>
+											{% if ENV != "prod" %}
+											<td>
+												<button
+													type="button"
+													class="btn btn-danger"
+													onclick="remove_alert('{{ key }}')"
+												>
+													Remove Alert
+												</button>
+											</td>
+											{% endif %}
+										</tr>
+										{% endfor %}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<!-- Billing Ignore Capacity -->
+					<div class="album py-5 bg-light">
+						<div class="container">
+							<p style="font-weight: bold">Billing Ignore Capacity:</p>
+							<div class="row">
+								<table width="100%" cellpadding="10">
+									<thead>
+										<th>Last Billing Alert</th>
+										<th>Current Billing Ignore Capacity</th>
+									</thead>
+									<form method="post" action="/alert/update-billing-ignore-capacity/">
+      									{% csrf_token %}
+										<tbody>
+											<tr>
+												<td>
+													<input 
+													type="textarea" 
+													name="last_billing_alert"
+													value="{{ billing_last_alert }}"
+													style="height: 100%; width: 100%;"
+													disabled
+													>
+												</td>
+												<td>
+													<input 
+													type="textarea" 
+													name="current_billing_ignore"
+													value="{{ billing_ignore_capacity }}"
+													style="width: 100%;"
+													>
+												</td>
+											</tr>
+											<tr>
+												<td></td>
+												<td align="center">
+													<input 
+													type="submit"
+													value="Submit" 
+													class="btn btn-success"
+													style="width: 100%;"
+													>
+												</td>
+											</tr>
+										</tbody>
+									</form>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<!-- Alerts Category List -->
+					<div class="album py-5 bg-light">
+					  <div class="container">
+						<p style="font-weight: bold">
+							Alert Category List:
+						</p>
+						<div class="row">
+						  {% for values in alerts_category %}
+						  <div class="col-md-3">
+							<div class="card mb-3 box-shadow" style="cursor: pointer;" id="category-{{values}}" onclick="silent(this)">
+							  <div class="card-body">
+								<p class="card-text"> {{ values|title }} </p>
+							  </div>
+							</div>
+						  </div>
+						  {% endfor %}
+						</div>
+					  </div>
+					</div>
+				</main>
+			</div>
+		</div>
+		<div id="silent_list" style="display: none;">{{silent_list}}</div>
+		<footer class="text-muted">
+			<div class="container text-center">
+				<p> Silent Alert - {{ is_silent }} ( Last Updated - {{ silent_at }} ) </p>
+				<p> <a target="_blank" href="/status/alert-logs">Click here</a> to get Alert Logs </p>
+			</div>
+		  </footer>
+		
+		
+		<!-- Bootstrap core JavaScript
+================================================== -->
+		<!-- Placed at the end of the document so the pages load faster -->
+		<script
+			src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+			integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+			integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+			integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+			crossorigin="anonymous"
+		></script>
+		<script src="https://unpkg.com/axios@0.27.2/dist/axios.min.js"></script>
+
+		<script>
+			var silent_data = document.getElementById("silent_list").innerHTML;
+			silent_data = silent_data.replace(/^\s+|\s+$/g, '');
+			console.log(silent_data)
+			for (const item of silent_data.split(",")) {
+				$("#"+item).addClass("silent-active");
+			}
+
+			async function unsilent(service_name) {
+				try {
+					var res = await axios.post("/alert/silent/", {
+						service_name: service_name,
+						status: false,
+					});
+					alert(res.data);
+				} catch (error) {
+					console.log(error);
+				}
+			}
+			async function all_silent(flag) {
+				try {
+					var res = await axios.get(
+						"/alert/toggle_silent_alert/" + flag
+					);
+					alert(res.data);
+				} catch (error) {
+					console.log(error);
+				}
+			}
+			async function remove_alert(service_name) {
+				try {
+					var res = await axios.post("/alert/remove-service/", {
+						service_name: service_name
+					});
+					alert(res.data);
+					location.reload();
+				} catch (error) {
+					console.log(error);
+				}
+			}
+			async function silent(element) {
+				let status = false;
+				silent_data = document.getElementById("silent_list").innerHTML;
+				console.log(element.id);
+				if(!silent_data.includes(element.id))
+					status = true;
+				try {
+				let res = await axios.post("/alert/silent/", {
+					service_name: element.id,
+					status: status
+				});
+				res = res.data;
+				if (res == "Success")
+					element.classList.toggle("silent-active");
+				let silent_list=document.getElementsByClassName('silent-active');
+				silent_data="";
+				for (const item of silent_list) {
+					silent_data += item.id + ",";
+				}
+				document.getElementById("silent_list").innerHTML = silent_data;
+				} catch (error) {
+				console.log(error)
+				}
+			}
+  
+		</script>
+	</body>
+</html>

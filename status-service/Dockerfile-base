@@ -1,0 +1,5 @@
+FROM apps.kristal.ai/status-base:staging
+RUN pip install boto3
+RUN apk add rsyslog
+
+ADD ./rsyslog.conf /etc/rsyslog.conf

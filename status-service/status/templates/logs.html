@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		{% load static %}
+		<meta charset="utf-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1, shrink-to-fit=no"
+		/>
+		<meta name="description" content="" />
+		<meta name="author" content="" />
+
+		<title>{{ENV|title}} {{title}} Audit Logs</title>
+
+		<!-- Bootstrap core CSS -->
+		<link
+			rel="stylesheet"
+			href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+			integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+			crossorigin="anonymous"
+		/>
+		<link
+			rel="stylesheet"
+			href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css"
+			crossorigin="anonymous"
+		/>
+		<link
+			rel="stylesheet"
+			href="https://cdn.datatables.net/datetime/1.1.1/css/dataTables.dateTime.min.css"
+			crossorigin="anonymous"
+		/>
+	</head>
+
+	<body>
+		<header>
+			<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+				<div>
+					<a class="navbar-brand" href="#"
+						>Kristal {{ENV|title}} {{title}} Audit Logs</a
+					>
+				</div>
+				<ul class="nav navbar-nav ml">
+					<li class="nav-item">
+						<a class="nav-link" href="{{status_service_url}}/" target="_blank">Status</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="{{status_service_url}}/../infra" target="_blank">Infra</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="{{status_service_url}}/admin/" target="_blank">Admin</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="{{alert_service_url}}/">Alerts</a>
+					</li>
+				</ul>
+				<button
+					class="navbar-toggler"
+					type="button"
+					data-toggle="collapse"
+					data-target="#navbarNavAltMarkup"
+					aria-controls="navbarNavAltMarkup"
+					aria-expanded="false"
+					aria-label="Toggle navigation"
+				>
+					<span class="navbar-toggler-icon"></span>
+				</button>
+				<ul class="nav navbar-nav ml-auto">
+					<span class="text-light">Welcome {{ user_name }}</span>
+				</ul>
+			</nav>
+		</header>
+
+		<div class="tab-content" id="pills-tabContent">
+			<div
+				class="tab-pane fade show active"
+				id="pills-{{env|title}}"
+				role="tabpanel"
+				aria-labelledby="pills-{{env|title}}-tab"
+			>
+				<main role="main">
+					<div class="album py-5 bg-light">
+						<div class="container">
+							<div class="row" width="100%">
+								<table border="0" cellpadding="10">
+									<tbody>
+										<tr>
+											<td>Minimum date:</td>
+											<td>
+												<input
+													type="text"
+													id="min"
+													name="min"
+												/>
+											</td>
+										</tr>
+										<tr>
+											<td>Maximum date:</td>
+											<td>
+												<input
+													type="text"
+													id="max"
+													name="max"
+												/>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<br />
+						<br />
+						<div class="container">
+							<div>
+								<table
+									id="example"
+									class="display"
+									width="100%"
+								>
+									<thead>
+										<tr>
+											{% for values in columns %}
+											<th>{{ values }}</th>
+											{% endfor %}
+										</tr>
+									</thead>
+									<tbody>
+										{% for log in rows %}
+										<tr>
+											{% for value in log %}
+											<td>{{ value|safe }}</td>
+											{% endfor %}
+										</tr>
+										{% endfor %}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</main>
+			</div>
+		</div>
+
+		<!-- Bootstrap core JavaScript
+  ================================================== -->
+		<!-- Placed at the end of the document so the pages load faster -->
+		<script
+			src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+			integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+			integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+			integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://code.jquery.com/jquery-3.5.1.js"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://cdn.datatables.net/datetime/1.1.1/js/dataTables.dateTime.min.js"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"
+			crossorigin="anonymous"
+		></script>
+		<script>
+			var minDate, maxDate;
+
+			// Custom filtering function which will search data in column four between two values
+			$.fn.dataTable.ext.search.push(function (
+				settings,
+				data,
+				dataIndex
+			) {
+				var min = minDate.val();
+				var max = maxDate.val();
+				var date = new Date(data[0]);
+
+				if (
+					(min === null && max === null) ||
+					(min === null && date <= max) ||
+					(min <= date && max === null) ||
+					(min <= date && date <= max)
+				) {
+					return true;
+				}
+				return false;
+			});
+
+			$(document).ready(function () {
+				// Create date inputs
+				minDate = new DateTime($("#min"), {
+					format: "MMMM Do YYYY HH:mm",
+				});
+				maxDate = new DateTime($("#max"), {
+					format: "MMMM Do YYYY HH:mm",
+				});
+
+				// Setup - add a text input to each footer cell
+				$('#example thead tr')
+					.clone(true)
+					.addClass('filters')
+					.appendTo('#example thead');
+				// DataTables initialisation
+				var table = $("#example").DataTable({
+					dom: "Blfrtip",
+					buttons: ["copy", "csv", "excel", "pdf", "print"],
+					lengthMenu: [
+						[10, 25, 50, -1],
+						[10, 25, 50, "All"],
+					],
+					"order": [],
+					orderCellsTop: true,
+					fixedHeader: true,
+					initComplete: function () {
+						var api = this.api();
+			
+						// For each column
+						api
+							.columns()
+							.eq(0)
+							.each(function (colIdx) {
+								// Set the header cell to contain the input element
+								var cell = $('.filters th').eq(
+									$(api.column(colIdx).header()).index()
+								);
+								var title = $(cell).text();
+								$(cell).html('<input type="text" placeholder="' + title + '" />');
+			
+								// On every keypress in this input
+								$(
+									'input',
+									$('.filters th').eq($(api.column(colIdx).header()).index())
+								)
+									.off('keyup change')
+									.on('keyup change', function (e) {
+										e.stopPropagation();
+			
+										// Get the search value
+										$(this).attr('title', $(this).val());
+										var regexr = '({search})'; //$(this).parents('th').find('select').val();
+			
+										var cursorPosition = this.selectionStart;
+										// Search the column for that value
+										api
+											.column(colIdx)
+											.search(
+												this.value != ''
+													? regexr.replace('{search}', '(((' + this.value + ')))')
+													: '',
+												this.value != '',
+												this.value == ''
+											)
+											.draw();
+			
+										$(this)
+											.focus()[0]
+											.setSelectionRange(cursorPosition, cursorPosition);
+									});
+							});
+					},
+
+				});
+
+				// Refilter the table
+				$("#min, #max").on("change", function () {
+					table.draw();
+				});
+			});
+		</script>
+	</body>
+</html>

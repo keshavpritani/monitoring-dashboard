@@ -1,0 +1,59 @@
+                            for current in curr:
+                                if key in current and str(current[key]) in common_instances:
+                                    for baseline in base:
+                                        if key in baseline and baseline[key] == current[key]:
+                                            for main_key, key_1 in (
+                                                    ("IpRanges", "CidrIp"), ("UserIdGroupPairs", "GroupId")):
+                                                if baseline[main_key] != current[main_key]:
+                                                    curr_cidr = [y[key_1] for y in current[main_key] if
+                                                                 key_1 in y]
+                                                    base_cidr = [y[key_1] for y in baseline[main_key] if
+                                                                 key_1 in y]
+                                                    deleted = list(map(str, set(base_cidr) - set(curr_cidr)))
+                                                    added = list(map(str, set(curr_cidr) - set(base_cidr)))
+                                                    common = list(
+                                                        map(str, set(curr_cidr).intersection(base_cidr)))
+
+                                                    if len(deleted) > 0:
+                                                        desc += column_list["sg"][
+                                                                    x] + " = Port : " + str(current[
+                                                                                                key]) + " - " + "Deleted " + key_1 + " : " + ";".join(
+                                                            deleted) + "<br>"
+                                                    if len(added) > 0:
+                                                        desc += column_list["sg"][
+                                                                    x] + " = Port : " + str(current[
+                                                                                                key]) + " - " + "Added " + key_1 + " : " + ";".join(
+                                                            added) + "<br>"
+                                                    if len(common_instances) > 0:
+                                                        for curr_ip in current[main_key]:
+                                                            if key_1 in curr_ip and curr_ip[key_1] in common:
+                                                                for base_ip in baseline[main_key]:
+                                                                    if key_1 in base_ip and base_ip[key_1] == curr_ip[
+                                                                        key_1]:
+                                                                        key_2 = "Description"
+                                                                        if key_2 not in base_ip:
+                                                                            if key_2 not in curr_ip:
+                                                                                break
+                                                                            else:
+                                                                                desc += column_list["sg"][
+                                                                                            x] + " = Port : " + str(
+                                                                                    current[key]) + " - CidrIP : " + \
+                                                                                        curr_ip[
+                                                                                            key_1] + " - Description added : " + \
+                                                                                        curr_ip[key_2] + "<br>"
+                                                                        elif key_2 not in curr_ip:
+                                                                            desc += column_list["sg"][
+                                                                                        x] + " = Port : " + str(
+                                                                                current[key]) + " - CidrIP : " + \
+                                                                                    curr_ip[
+                                                                                        key_1] + " - Description deleted : " + \
+                                                                                    base_ip[key_2] + "<br>"
+                                                                        elif curr_ip[key_2] != base_ip[key_2]:
+                                                                            desc += column_list["sg"][
+                                                                                        x] + " = Port : " + str(
+                                                                                current[key]) + " - CidrIP : " + \
+                                                                                    curr_ip[
+                                                                                        key_1] + " - Description changed to : " + \
+                                                                                    curr_ip[key_2] + "<br>"
+                                                                        break
+                                            break

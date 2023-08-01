@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+  {% load static %}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+
+  <title>Prod Components</title>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+</head>
+
+<body>
+
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <a class="navbar-brand" href="#" >Kristal Prod Components</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </nav>
+  </header>
+
+
+<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+  <li class="nav-item" role="presentation">
+    <a class="nav-link active" id="pills-internal-tab" data-toggle="pill" href="#pills-internal" role="tab" aria-controls="pills-internal" aria-selected="true">Internal</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link" id="pills-saxo-tab" data-toggle="pill" href="#pills-saxo" role="tab" aria-controls="pills-saxo" aria-selected="false">Tokens</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link" id="pills-rate-limit-tab" data-toggle="pill" href="#pills-rate-limit" role="tab" aria-controls="pills-rate-limit" aria-selected="false">Rate Limit</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link" id="pills-reports-tab" data-toggle="pill" href="#pills-reports" role="tab" aria-controls="pills-reports" aria-selected="false">Reports</a>
+  </li>
+    <li class="nav-item" role="presentation">
+    <a class="nav-link" id="pills-queue-tab" data-toggle="pill" href="#pills-queue" role="tab" aria-controls="pills-queue" aria-selected="false">Queue Table</a>
+  </li>
+    <li class="nav-item" role="presentation">
+    <a class="nav-link" id="pills-instances-tab" data-toggle="pill" href="#pills-instances" role="tab" aria-controls="pills-instances" aria-selected="false">Aws Instances</a>
+  </li>
+</ul>
+<div class="tab-content" id="pills-tabContent">
+  <div class="tab-pane fade show active" id="pills-internal" role="tabpanel" aria-labelledby="pills-internal-tab">
+      <main role="main">
+
+        <div class="album py-5 bg-light">
+      <div class="container">
+        <p><strong>Backend:</strong></p>
+        <div class="row">
+          {% for key, values in services.items %}
+          {% if values.1 == 'backend' %}
+          <div class="col-md-3">
+            <div class="card mb-3 box-shadow">
+              <div class="card-body">
+                {% if values.0 == 'Green' %}
+                <p class="card-text"> {{ key }} &#9989; </p>
+                {% elif values.0 == 'Yellow' %}
+                <p class="card-text"> {{ key }} &#x1F315; </p>
+                {% elif values.0 == 'Red' %}
+                <p class="card-text"> {{ key }} &#10060; </p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endif %}
+          {% endfor %}
+
+        </div>
+
+        <p></p>
+        <p><strong>UI:</strong></p>
+        <div class="row">
+          {% for key, values in services.items %}
+          {% if values.1 == 'ui' %}
+          <div class="col-md-3">
+            <div class="card mb-3 box-shadow">
+              <div class="card-body">
+                {% if values.0 == 'Green' %}
+                <p class="card-text"> {{ key }} &#9989; </p>
+                {% elif values.0 == 'Yellow' %}
+                <p class="card-text"> {{ key }} &#x1F315; </p>
+                {% elif values.0 == 'Red' %}
+                <p class="card-text"> {{ key }} &#10060; </p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endif %}
+          {% endfor %}
+
+        </div>
+        <p></p>
+        <p><strong>Jobs:</strong></p>
+        <div class="row">
+          {% for key, values in services.items %}
+          {% if values.1 == 'jobs' %}
+          <div class="col-md-3">
+            <div class="card mb-3 box-shadow">
+              <div class="card-body">
+                {% if values.0 == 'Green' %}
+                <p class="card-text"> {{ key }} &#9989; </p>
+                {% elif values.0 == 'Yellow' %}
+                <p class="card-text"> {{ key }} &#x1F315; </p>
+                {% elif values.0 == 'Red' %}
+                <p class="card-text"> {{ key }} &#10060; </p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endif %}
+          {% endfor %}
+
+        </div>
+
+                <p></p>
+        <p><strong>Services:</strong></p>
+        <div class="row">
+          {% for key, values in services.items %}
+          {% if values.1 == 'services' %}
+          <div class="col-md-3">
+            <div class="card mb-3 box-shadow">
+              <div class="card-body">
+                {% if values.0 == 'Green' %}
+                <p class="card-text"> {{ key }} &#9989; </p>
+                {% elif values.0 == 'Yellow' %}
+                <p class="card-text"> {{ key }} &#x1F315; </p>
+                {% elif values.0 == 'Red' %}
+                <p class="card-text"> {{ key }} &#10060; </p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endif %}
+          {% endfor %}
+
+      </div>
+
+        <p></p>
+        <p><strong>Consumers:</strong></p>
+        <div class="row">
+          {% for key, values in services.items %}
+          {% if values.1 == 'consumer' %}
+          <div class="col-md-3">
+            <div class="card mb-3 box-shadow">
+              <div class="card-body">
+                {% if values.0 == 'Green' %}
+                <p class="card-text"> {{ key }} &#9989; </p>
+                {% elif values.0 == 'Yellow' %}
+                <p class="card-text"> {{ key }} &#x1F315; </p>
+                {% elif values.0 == 'Red' %}
+                <p class="card-text"> {{ key }} &#10060; </p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endif %}
+          {% endfor %}
+
+        </div>
+        </main>
+
+
+  </div>
+
+
+
+  <div class="tab-pane fade" id="pills-rate-limit" role="tabpanel" aria-labelledby="pills-rate-limit-tab">
+
+    <main role="main">
+
+        <div class="album py-5 bg-light">
+      <div class="container">
+
+        <p><strong>Redis rate limiting keys:</strong></p>
+        <div class="row">
+          {% for key, values in services.items %}
+          {% if values.1 == 'rate_limit' %}
+          <div class="col-md-3">
+            <div class="card mb-3 box-shadow">
+              <div class="card-body">
+                {% if values.0 == 'Green' %}
+                <p class="card-text"> {{ key }} &#9989; </p>
+                {% elif values.0 == 'Yellow' %}
+                <p class="card-text"> {{ key }} &#x1F315; </p>
+                {% elif values.0 == 'Red' %}
+                <p class="card-text"> {{ key }} &#10060; </p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endif %}
+          {% endfor %}
+    </div>
+    </main>
+
+
+
+</div>
+
+<div class="tab-pane fade" id="pills-instances" role="tabpanel" aria-labelledby="pills-instances-tab">
+
+    <main role="main">
+
+        <div class="album py-5 bg-light">
+      <div class="container">
+
+        <p><strong>AWS instances:</strong></p>
+        <div class="row">
+          {% for key, values in services.items %}
+          {% if values.1 == 'aws' %}
+          <div class="col-md-3">
+            <div class="card mb-3 box-shadow">
+              <div class="card-body">
+                {% if values.0 == 'Green' %}
+                <p class="card-text"> {{ key }} &#9989; </p>
+                {% elif values.0 == 'Yellow' %}
+                <p class="card-text"> {{ key }} &#x1F315; </p>
+                {% elif values.0 == 'Red' %}
+                <p class="card-text"> {{ key }} &#10060; </p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endif %}
+          {% endfor %}
+    </div>
+    </main>
+
+
+  </div>
+
+  <div class="tab-pane fade" id="pills-saxo" role="tabpanel" aria-labelledby="pills-saxo-tab">
+
+    <main role="main">
+
+        <div class="album py-5 bg-light">
+      <div class="container">
+
+        <p><strong>Saxo Tokens:</strong></p>
+        <div class="row">
+          {% for key, values in saxo.items %}
+          <div class="col-md-3">
+            <div class="card mb-3 box-shadow">
+              <div class="card-body">
+                {% if values.0 == 'Green' %}
+                <p class="card-text"> {{ key }} <b><span style="color: blue">{{ values.1 }}</span></b>  &#9989; </p>
+                {% elif values.0 == 'Yellow' %}
+                <p class="card-text"> {{ key }} <b><span style="color: blue">{{ values.1 }}</span></b> &#x1F315; </p>
+                {% elif values.0 == 'Red' %}
+                <p class="card-text"> {{ key }} <b><span style="color: blue">{{ values.1 }}</span></b> &#10060; </p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+    </div>
+
+                  <p></p>
+        <p><strong>Flex Validation:</strong></p>
+        <div class="row">
+          {% for key, values in flex_validation.items %}
+          <div class="col-md-3">
+            <div class="card mb-3 box-shadow">
+              <div class="card-body">
+                {% if values.0 == 'Green' %}
+                <p class="card-text"> {{ key }} <b><span style="color: blue">{{ values.1 }}</span></b> &#9989; </p>
+                {% elif values.0 == 'Yellow' %}
+                <p class="card-text"> {{ key }} <b><span style="color: red">{{ values.1 }}</span></b> &#x1F315; </p>
+                {% elif values.0 == 'Red' %}
+                <p class="card-text"> {{ key }} <b><span style="color: red">{{ values.1 }}</span></b> &#10060; </p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+
+      </div>
+
+    </main>
+
+
+  </div>
+
+  <div class="tab-pane fade" id="pills-reports" role="tabpanel" aria-labelledby="pills-reports-tab">
+
+
+    <main role="main">
+
+        <div class="album py-5 bg-light">
+      <div class="container">
+
+
+        <p><strong>Reports:</strong></p>
+        <div class="row">
+          {% for key, values in reports.items %}
+          <div class="col-md-3">
+            <div class="card mb-3 box-shadow">
+              <div class="card-body">
+                {% if values == 'Green' %}
+                <p class="card-text"> {{ key }} &#9989; </p>
+                {% elif values == 'Yellow' %}
+                <p class="card-text"> {{ key }} &#x1F315; </p>
+                {% elif values == 'Red' %}
+                <p class="card-text"> {{ key }} &#10060; </p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+         </div>
+    </main>
+  </div>
+
+
+  <div class="tab-pane fade" id="pills-queue" role="tabpanel" aria-labelledby="pills-queue-tab">
+  <main role="main">
+            <div class="album py-5 bg-light">
+      <div class="container">
+
+
+        <p><strong>Queue Table Enteries:</strong></p>
+        <div class="row">
+          {% for key, values in queue.items %}
+          <div class="col-md-3">
+            <div class="card mb-3 box-shadow">
+              <div class="card-body">
+              <p class="card-text" > {{ key }} <b><span style="color: blue">{{ values.0 }}</span>  <span style="color: red">{{ values.1 }}</span></b> </p>
+               </div>
+            </div>
+          </div>
+          {% endfor %}
+         </div>
+    </main>
+
+  </div>
+</div>
+
+
+  <footer class="text-muted">
+    <div class="container text-center">
+        <p>{{ last }}</p>
+        <p > &#9989; Available</p>
+        <p> &#x1F315; Some Services are Down </p>
+        <p> &#10060; Complete Cluster Down</p>
+    </div>
+  </footer>
+
+  <!-- Bootstrap core JavaScript
+  ================================================== -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>

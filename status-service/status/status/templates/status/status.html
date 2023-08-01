@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="en">
+<head>
+  {% load static %}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+
+  <title>{{ENV | title}} Components</title>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+  <link
+  rel="stylesheet"
+  href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css"
+  crossorigin="anonymous"
+/>
+<link
+  rel="stylesheet"
+  href="https://cdn.datatables.net/datetime/1.1.1/css/dataTables.dateTime.min.css"
+  crossorigin="anonymous"
+/>
+  <style>
+    .silent-active {
+      border-color: red; 
+      border-width: 0.1cm;
+      color: red;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <header>
+    <nav class="navbar navbar-default navbar-expand-lg navbar-dark bg-dark">
+        <div class="navbar-header">    
+          <a class="navbar-brand" href="#" >Kristal {{ENV | title}} Components</a>
+        </div>
+        <ul class="nav navbar-nav ml">
+          <li class="nav-item active">
+            <a class="nav-link" href="#">Status</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/infra" target="_blank">Infra</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/status/admin" target="_blank">Admin</a>
+          </li>
+					<li class="nav-item">
+						<a class="nav-link" href="{{alert_service_url}}/" target="_blank">Alerts</a>
+					</li>
+        </ul>
+      <ul class="nav navbar-nav ml-auto">
+        <span class="text-light">Welcome {{ user_name }}</span>
+      </ul>
+    </nav>
+  </header>
+
+
+<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+  <li class="nav-item" role="presentation">
+    <a class="nav-link active" id="pills-internal-tab" data-toggle="pill" href="#pills-internal" role="tab" aria-controls="pills-internal" aria-selected="true">Internal</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link" id="pills-saxo-tab" data-toggle="pill" href="#pills-saxo" role="tab" aria-controls="pills-saxo" aria-selected="false">Tokens</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link" id="pills-batchapps-tab" data-toggle="pill" href="#pills-batchapps" role="tab" aria-controls="pills-batchapps" aria-selected="false">BatchApps</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link" id="pills-rate-limit-tab" data-toggle="pill" href="#pills-rate-limit" role="tab" aria-controls="pills-rate-limit" aria-selected="false">Rate Limit</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link" id="pills-queue-tab" data-toggle="pill" href="#pills-queue" role="tab" aria-controls="pills-queue" aria-selected="false">Queue Table</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link" id="pills-instances-tab" data-toggle="pill" href="#pills-instances" role="tab" aria-controls="pills-instances" aria-selected="false">Aws Instances</a>
+  </li>
+  <li class="nav-item" role="presentation">
+      <a class="nav-link" id="pills-solr-tab" data-toggle="pill" href="#pills-solr" role="tab" aria-controls="pills-solr" aria-selected="false">Solr</a>
+  </li>
+  <!-- <li class="nav-item" role="presentation">
+    <a class="nav-link" id="pills-docker-tab" data-toggle="pill" href="#pills-docker" role="tab" aria-controls="pills-docker" aria-selected="false">Docker Image Status</a>
+  </li> -->
+  <li class="nav-item" role="presentation">
+    <a class="nav-link" id="pills-certificates-tab" data-toggle="pill" href="#pills-certificates" role="tab" aria-controls="pills-certificates" aria-selected="false">Certificates</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link" id="pills-Version-tab" data-toggle="pill" href="#pills-Version" role="tab" aria-controls="pills-Version" aria-selected="false">Components Version</a>
+  </li>
+</ul>
+
+
+<div class="tab-content" id="pills-tabContent">
+  <div class="tab-pane fade show active" id="pills-internal" role="tabpanel" aria-labelledby="pills-internal-tab">
+      <main role="main">
+        <div class="album py-5 bg-light">
+          <div class="container">
+            {% for category, item in services.items %}
+            <p id="category-{{ category.split.0 }}" onclick="silent(this)" style="cursor: pointer; font-weight: bold;" >{{ category|title }}:</p>
+            <div class="row">
+              {% for values in item %}
+              <div class="col-md-3">
+                <div class="card mb-3 box-shadow" style="cursor: pointer;" id="{{values.1}}" onclick="silent(this)">
+                  <div class="card-body">
+                    {% if values.0 == 'Green' %}
+                    <p class="card-text"> {{ values.1 }} &#9989; </p>
+                    {% elif values.0 == 'Yellow' %}
+                    <p class="card-text"> {{ values.1 }} &#x1F315; </p>
+                    {% elif values.0 == 'Red' %}
+                    <p class="card-text"> {{ values.1 }} &#10060; </p>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </main>
+  </div>
+
+  <div class="tab-pane fade" id="pills-saxo" role="tabpanel" aria-labelledby="pills-saxo-tab">
+    <main role="main">
+      <div class="album py-5 bg-light">
+        <div class="container">
+        {% for title, dict in tokens.items %}
+        {% if title != 'DMS Tasks' or dict.keys|length > 0 %}
+        <p id="category-{{ title.split.0 }}" onclick="silent(this)" style="cursor: pointer; font-weight: bold;" >{{ title }}:</p>
+        <div class="row">
+          {% for key, values in dict.items %}
+          <div class="col-md-3">
+            <div class="card mb-3 box-shadow" style="cursor: pointer;" id="{{ key }}" onclick="silent(this)">
+              <div class="card-body">
+                {% if values.0 == 'Green' %}
+                <p class="card-text"> {{ key }} <b><span style="color: blue">{{ values.1 }}</span></b>  &#9989; </p>
+                {% elif values.0 == 'Yellow' %}
+                <p class="card-text"> {{ key }} <b><span style="color: yellow">{{ values.1 }}</span></b> &#x1F315; </p>
+                {% elif values.0 == 'Red' %}
+                <p class="card-text"> {{ key }} <b><span style="color: red">{{ values.1 }}</span></b> &#10060; </p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </main>
+  </div>
+
+  <div class="tab-pane fade" id="pills-batchapps" role="tabpanel" aria-labelledby="pills-batchapps-tab">
+
+    <main role="main">
+
+        <div class="album py-5 bg-light">
+      <div class="container">
+
+        <p id="category-running_batch_app" onclick="silent(this)" style="cursor: pointer; font-weight: bold;" >BatchApps Status:</p>
+        <div class="row">
+          {% for key, values in batch_app.items %}
+          <div class="col-xxl-100">
+            <div class="card mb-3 box-shadow">
+              <div class="card-body">
+                {% if values.0 == 'RUNNING' %}
+             <p class="card-text"> {{ key }} <span style="color: Red"> &nbsp &nbsp &nbsp &nbsp{{ values.0 }} &nbsp &nbsp &nbsp &nbsp {{ values.1 }} &nbsp &nbsp &nbsp &nbsp {{ values.2 }} &nbsp &nbsp &nbsp &nbsp {{ values.3 }} &nbsp &nbsp &nbsp &nbsp {{ values.4 }}</span>  </p>
+              {% elif values.0 == 'DONE' %}
+             <p class="card-text"> {{ key }} <span style="color: Blue"> &nbsp &nbsp &nbsp &nbsp{{ values.0 }} &nbsp &nbsp &nbsp &nbsp {{ values.1 }} &nbsp &nbsp &nbsp &nbsp {{ values.2 }} &nbsp &nbsp &nbsp &nbsp {{ values.3 }} &nbsp &nbsp &nbsp &nbsp {{ values.4 }}</span>  </p>
+            {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+    </div>
+    </main>
+
+
+
+  </div>
+
+  <div class="tab-pane fade" id="pills-rate-limit" role="tabpanel" aria-labelledby="pills-rate-limit-tab">
+
+    <main role="main">
+
+        <div class="album py-5 bg-light">
+      <div class="container">
+
+        <p id="category-rate_limit" onclick="silent(this)" style="cursor: pointer; font-weight: bold;" >Redis rate limiting keys:</p>
+        <div class="row">
+          {% for values in rate_limit %}
+          <div class="col-md-3">
+            <div class="card mb-3 box-shadow">
+              <div class="card-body">
+                {% if values.0 == 'Green' %}
+                <p class="card-text"> {{ values.1 }} &#9989; </p>
+                {% elif values.0 == 'Yellow' %}
+                <p class="card-text"> {{ values.1 }} &#x1F315; </p>
+                {% elif values.0 == 'Red' %}
+                <p class="card-text"> {{ values.1 }} &#10060; </p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+    </div>
+    </main>
+
+
+
+  </div>
+
+  <div class="tab-pane fade" id="pills-queue" role="tabpanel" aria-labelledby="pills-queue-tab">
+  <main role="main">
+            <div class="album py-5 bg-light">
+      <div class="container">
+
+
+        <p><strong>Queue Table Enteries:</strong></p>
+        <div class="row">
+          {% for key, values in queue.items %}
+          <div class="col-md-3">
+            <div class="card mb-3 box-shadow">
+              <div class="card-body">
+              <p class="card-text" > {{ key }} <b><span style="color: blue">{{ values.0 }}</span>  <span style="color: red">{{ values.1 }}</span></b> </p>
+               </div>
+            </div>
+          </div>
+          {% endfor %}
+         </div>
+    </main>
+
+  </div>
+
+  <div class="tab-pane fade" id="pills-instances" role="tabpanel" aria-labelledby="pills-instances-tab">
+
+    <main role="main">
+
+      <div class="album py-5 bg-light">
+    <div class="container">
+      <p id="category-aws" onclick="silent(this)" style="cursor: pointer; font-weight: bold;" >AWS Instances:</p>
+
+      {% for key, instance_values in aws_instances.items %}
+      <p><strong>{{key | title}}:</strong></p>
+
+      <div class="row">
+        {% for values in instance_values %}
+        <div class="col-md-3">
+          <div class="card mb-3 box-shadow">
+            <div class="card-body">
+              {% if values.1 == 'Green' %}
+              <p class="card-text"> {{ values.0 }} {{ values.2 }} &#9989; </p>
+              {% elif values.1 == 'Red' %}
+              <p class="card-text"> {{ values.0 }} {{ values.2 }} &#10060; </p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+
+        <p></p>
+    </div>
+  </div>
+  </main>
+
+
+  </div>
+
+  <div class="tab-pane fade" id="pills-solr" role="tabpanel" aria-labelledby="pills-solr-tab">
+    <main role="main">
+      <div class="bg-light" style="padding-top: 20px;">
+          <div class="container-fluid">
+              <button type="button" class="btn btn-success btn-md" onclick="refresh()"> Refresh </button>
+              Last Refresh: <span id="last_refresh">{{ last_refresh }}</span>
+          </div>
+      </div>
+      <div class="album py-5 bg-light">
+      <div class="container">
+          <div class="row">
+            {% for key, values in solr.items %}
+            <div class="col-md-3">
+              <div class="card mb-3 box-shadow">
+                <div class="card-body">
+
+                  <p class="card-text" id = "{{ key }}"
+                  {% if values == "Not Found" %} style="color:red" {% endif %}
+                  > {{ key }} = {{ values }}</p>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+      </main>
+  </div>
+
+  <!-- <div class="tab-pane fade" id="pills-docker" role="tabpanel" aria-labelledby="pills-docker-tab">
+    <main role="main">
+        <div class="bg-light" style="padding-top: 20px;">
+            <div class="container-fluid">
+                <button type="button" class="btn btn-success btn-md" onclick="refresh_ecr()"> Refresh </button>
+                Last Refresh: <span id="last_refresh">{{ last_refresh_ecr }}</span>
+            </div>
+        </div>
+        <div class="album py-5 bg-light">
+          <div class="container">
+          <p><strong>Docker Image's Last Modified Time:</strong></p>
+          <table class="table table-striped" id="docker_datatable">
+            <thead>
+              <tr>
+                <th scope="col">Image Name</th>
+                <th scope="col">Last Pushed Time</th> # Removed
+                <th scope="col">Last Updated Time</th>
+                <th scope="col">SHA Status</th> # Removed
+              </tr>
+            </thead>
+            <tbody>
+              {% for values in docker %}
+              <tr>
+                <td>{{ values.0 }}</td>
+                <td>{{ values.1 }}</td>
+                <td>{{ key }}</td>  # Removed
+                <td>{{ values.image_pushed|pretty_print_seconds }}</td> # Removed
+                <td>{{ values.last_updated|pretty_print_seconds }}</td> # Removed
+                <td>{{ values.status }}</td> # Removed
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+    </div>
+  </main>
+  </div> -->
+  
+  <div class="tab-pane fade" id="pills-certificates" role="tabpanel" aria-labelledby="pills-certificates-tab">
+    <main role="main">
+        <div class="album py-5 bg-light">
+          <div class="container">
+            <p id="category-certificates" onclick="silent(this)" style="cursor: pointer; font-weight: bold;" >Certificates:</p>
+            <table class="table table-striped">
+            <thead>
+              <tr>
+                <th scope="col">Certificate No</th>
+                <th scope="col">Certificate Name</th>
+                <th scope="col">Expiry Date </th>
+                <th scope="col">Last Update On </th>
+                <th scope="col">Last Update By</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for key, values in certificates.items %}
+              <tr>
+                <td>{{ key }}</td>
+                <td>{{ values.Name }}</td>
+                <td>{{ values.ExpiryDate }}</td>
+                <td>{{ values.LastUpdateOn }}</td>
+                <td>{{ values.LastUpdateBy }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+  
+                
+          </table>
+    </div>
+  </main>
+  </div>
+    
+<div class="tab-pane fade" id="pills-Version" role="tabpanel" aria-labelledby="pills-Version-tab">
+  <main role="main">
+      <div class="album py-5 bg-light">
+        <div class="container">
+        <p><strong>Application Components Version</strong></p>
+        <table class="table table-striped">
+          <thead>  
+            <tr>  
+              <th>Server</th>  
+              <th>Components</th>   
+            </tr>  
+          </thead>  
+          <tbody>  
+              {% for result in version1 %}
+              <tr>
+                     <td>{{result.hostname}}</td>
+                     <td>{{result.component}}</td>
+              </tr>
+              {% endfor %}  
+          </tbody>  
+        </table> 
+        <br>
+        <br>
+        <p><strong>Infrastructure Components Version</strong></p>
+        <table class="table table-striped">
+          <thead>  
+            <tr>  
+              <th>Server</th>  
+              <th>Components</th>   
+            </tr>  
+          </thead>  
+          <tbody>  
+              {% for result in version %}
+              <tr>
+                    <td>{{result.hostname}}</td>
+                     <td>{{result.component}}</td>
+              </tr>
+              {% endfor %}  
+          </tbody>  
+        </table>
+</div>
+</main>
+</div>
+</div>
+<div id="silent_list" style="display: none;">{{silent_list}}</div>
+<div id="alert_service_url" style="display: none;">{{alert_service_url}}</div>
+
+
+  <footer class="text-muted">
+    <div class="container text-center">
+        <p>{{ last }}</p>
+        <p > &#9989; Available</p>
+        <p> &#x1F315; Some Services are Down </p>
+        <p> &#10060; Complete Cluster Down</p>
+        <p> <a target="_blank" href="/status/alert-logs">Click here</a> to get Alert Logs </p>
+    </div>
+  </footer>
+
+  <!-- Bootstrap core JavaScript
+  ================================================== -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+<script
+  src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"
+  crossorigin="anonymous"
+></script>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"
+  crossorigin="anonymous"
+></script>
+<script
+  src="https://cdn.datatables.net/datetime/1.1.1/js/dataTables.dateTime.min.js"
+  crossorigin="anonymous"
+></script>
+<script
+  src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"
+  crossorigin="anonymous"
+></script>
+<script
+src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"
+crossorigin="anonymous"
+></script>
+<script
+src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"
+crossorigin="anonymous"
+></script>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<script type="text/javascript">
+  // $("#docker_datatable").DataTable({"order": [[1, "asc"]]});
+  var silent_data = document.getElementById("silent_list").innerHTML;
+  silent_data = silent_data.replace(/^\s+|\s+$/g, '');
+  for (const item of silent_data.split(",")) {
+    $("#"+item).addClass("silent-active");
+  }
+  async function refresh()
+  {
+      var res = await axios.get("/status/refresh/solr");
+      res = res.data
+      console.log(res);
+      let last_refresh = res["status"];
+      res = res["core"];
+      console.log("Last - " + last_refresh)
+      for (const item in res) {
+          $("#"+item).text(item + " = " + res[item])
+          let color="black";
+          if(res[item] == "Not Found")
+            color="red";
+          $("#"+item).css("color",color);
+      }
+      $("#last_refresh").text(last_refresh);
+  }
+
+  async function refresh_ecr()
+  {
+      var res = await axios.get("/status/refresh/ecr");
+      res = res.data
+      console.log(res);
+      if (res["status"] == "success") {
+        location.reload();
+      }
+  }
+
+  async function silent(element) {
+    // alert(element.id)
+    let status = false;
+    silent_data = document.getElementById("silent_list").innerHTML;
+    alert_service_url = document.getElementById("alert_service_url").innerHTML;
+    console.log(element.id);
+    if(!silent_data.includes(element.id))
+      status = true;
+    try {
+      let res = await axios.post(alert_service_url + "/silent/", {
+        service_name: element.id,
+        status: status
+      });
+      res = res.data;
+      if (res == "Success")
+        element.classList.toggle("silent-active");
+      let silent_list=document.getElementsByClassName('silent-active');
+      silent_data="";
+      for (const item of silent_list) {
+        silent_data += item.id + ",";
+      }
+      document.getElementById("silent_list").innerHTML = silent_data;
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  
+</script>
+</body>
+</html>

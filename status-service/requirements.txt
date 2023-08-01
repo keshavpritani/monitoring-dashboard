@@ -1,0 +1,12 @@
+wheel==0.37.1
+Django==4.0.4
+django-allauth==0.50.0
+djangorestframework==3.13.1
+# django-filteor
+# psycopg2
+psycopg2-binary==2.8.6
+requests==2.27.1
+boto3==1.22.0
+pandas==2.0.1
+openpyxl==3.0.10
+slack-sdk==3.21.3

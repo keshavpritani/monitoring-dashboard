@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		{% load static %}
+		<meta charset="utf-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1, shrink-to-fit=no"
+		/>
+		<meta name="description" content="" />
+		<meta name="author" content="" />
+
+		<title>Admin Console</title>
+
+		<!-- Bootstrap core CSS -->
+		<link
+			rel="stylesheet"
+			href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+			integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+			crossorigin="anonymous"
+		/>
+	</head>
+
+	<body>
+		<header>
+			<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+				<a class="navbar-brand" href="#">Kristal {{ENV|title}} Admin Console</a>
+				<ul class="nav navbar-nav ml">
+					<li class="nav-item">
+						<a class="nav-link" href="/status" target="_blank">Status</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="/infra" target="_blank">Infra</a>
+					</li>
+					<li class="nav-item active">
+						<a class="nav-link" href="#">Admin</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="{{alert_service_url}}/" target="_blank">Alerts</a>
+					</li>
+				</ul>
+				<ul class="nav navbar-nav ml-auto">
+					<span class="text-light">Welcome {{ user_name }}</span>
+				</ul>
+			</nav>
+		</header>
+
+		<div class="tab-content" id="pills-tabContent">
+			<div class="tab-pane fade show active" role="tabpanel">
+				<main role="main">
+
+					<!-- New Services -->
+					<div class="album py-5 bg-light">
+						<div class="container">
+							<p style="font-weight: bold">New Services List:</p>
+							<div class="row">
+								<table width="100%" border="1" cellpadding="5">
+									<thead>
+										<th>Service Name</th>
+										<th>Count</th>
+										<th>Monitor Url</th>
+										<th>Type</th>
+										<th>Action</th>
+									</thead>
+									<tbody>
+										{% for services in new_services %}
+										<form
+											method="POST"
+											action="/status/admin/new_service/"
+										>
+											{% csrf_token %}
+											<tr>
+												<td>
+													<input
+														type="text"
+														name="service_name"
+														value="{{ services.0 }}"
+														readonly
+													/>
+												</td>
+												<td>
+													<input
+														type="number"
+														name="count"
+														value="{{ services.1 }}"
+														required
+													/>
+												</td>
+												<td>
+													<input
+														type="url"
+														name="monitor_url"
+													/>
+													<!-- pattern="https?://.+/monitor" -->
+												</td>
+												<td>
+													<select
+														id="category"
+														name="category"
+														required
+													>
+														<option value="backend">
+															backend
+														</option>
+														<option value="ui">
+															ui
+														</option>
+														<option value="batchapps">
+															batchapps
+														</option>
+														<option
+															value="services"
+														>
+															services
+														</option>
+														<option
+															value="consumers"
+														>
+															consumers
+														</option>
+														<option
+															value="rate_limit"
+														>
+															rate_limit
+														</option>
+													</select>
+												</td>
+												<td>
+													<input
+														type="submit"
+														value="Add"
+														class="btn btn-success"
+													/>
+												</td>
+											</tr>
+										</form>
+										{% endfor %}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<!-- Batchapps Running -->
+					<div class="album py-5 bg-light">
+						<div class="container">
+							<p style="font-weight: bold">
+								Batchapps Running List:
+							</p>
+							<div class="row">
+								<table width="100%" border="1" cellpadding="5">
+									<thead>
+										<th>Batch Job Name</th>
+										<th>Process ID</th>
+										<th>DB</th>
+										<th>Running from</th>
+										<th>Action</th>
+									</thead>
+									<tbody>
+										{% for key, values in batchapp_dict.items %}
+										<tr>
+											<td>{{ key }}</td>
+											<td>{{ values.0 }}</td>
+											<td>{{ values.1 }}</td>
+											<td>{{ values.2 }}</td>
+											<td>
+												<button
+													type="button"
+													class="btn btn-success"
+													onclick="batchapp_done('{{ values.0 }}','{{ values.1 }}')"
+												>
+													Mark it as Done
+												</button>
+											</td>
+										</tr>
+										{% endfor %}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+
+				</main>
+			</div>
+		</div>
+		<footer class="text-muted">
+			<div class="container text-center">
+				<p> <a target="_blank" href="/status/alert-logs">Click here</a> to get Alert Logs </p>
+			</div>
+		  </footer>
+		
+		
+		<!-- Bootstrap core JavaScript
+================================================== -->
+		<!-- Placed at the end of the document so the pages load faster -->
+		<script
+			src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+			integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+			integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+			integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+			crossorigin="anonymous"
+		></script>
+		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+		<script>
+			async function batchapp_done(batchapp_done, db) {
+				try {
+					var res = await axios.get(
+						"/status/admin/batchapp_done/" +
+							batchapp_done +
+							"/" +
+							db
+					);
+					alert(res.data);
+				} catch (error) {
+					console.log(error);
+				}
+			}
+		</script>
+	</body>
+</html>

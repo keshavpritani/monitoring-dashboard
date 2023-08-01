@@ -1,0 +1,6 @@
+docker image build -t apps.kristal.ai/ping:prod /home/centos/status-python/ping-service
+docker push apps.kristal.ai/ping:prod
+
+docker image build -t apps.kristal.ai/status:prod /home/centos/status-python/status-service
+docker push apps.kristal.ai/status:prod
+
